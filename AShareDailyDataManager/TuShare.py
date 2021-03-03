@@ -15,7 +15,7 @@ from utils import log
 
 CHINA_TZ = timezone("Asia/Shanghai")
 
-tushare_token: str = "af689d2d1177a3cf791617c8714de5067217ad768c65e0697cabbdec"
+tushare_token: str = ""
 
 MAX_QUERY_SIZE: int = 5000
 TS_DATE_FORMATE: str = '%Y%m%d'
