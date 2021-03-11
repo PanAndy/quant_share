@@ -4,11 +4,12 @@ import sys
 import traceback
 from datetime import datetime, timedelta, time
 from time import sleep
+from typing import List
 
 from tqdm import tqdm
-from vnpy.trader.constant import Interval
-from vnpy.trader.database import database_manager
-from vnpy.trader.object import HistoryRequest
+from vnpy.trader.constant import Interval, Exchange
+from vnpy.trader.database import database_manager, BarOverview
+from vnpy.trader.object import HistoryRequest, BarData
 
 from utils import log
 
@@ -24,6 +25,7 @@ class AShareDailyDataManager:
         self.tushare_client = tushare_client
         self.symbols = None
         self.trade_cal = None
+        self.bar_overviews: List[BarOverview] = None
         self.init()
 
     def init(self):
@@ -31,6 +33,7 @@ class AShareDailyDataManager:
         self.tushare_client.init()
         self.symbols = self.tushare_client.symbols
         self.trade_cal = self.tushare_client.trade_cal
+        self.bar_overviews = database_manager.get_bar_overview()
 
     def download_all(self):
         """
@@ -65,6 +68,15 @@ class AShareDailyDataManager:
 
         log.info("A股股票全市场日线数据下载完毕")
 
+    def get_newest_bar_data(self, symbol: str, exchange: Exchange, interval: Interval) -> BarData or None:
+        """"""
+        for overview in self.bar_overviews:
+            if exchange == overview.exchange and interval == overview.interval and symbol == overview.symbol:
+                bars = database_manager.load_bar_data(symbol=symbol, exchange=exchange, interval=interval,
+                                                      start=overview.start, end=overview.start)
+                return bars[0] if bars is not None else None
+        return None
+
     def update_newest(self):
         """
         使用tushare更新本地数据库中的最新数据，默认本地数据库中原最新的数据之前的数据都是完备的
@@ -76,9 +88,9 @@ class AShareDailyDataManager:
                 for tscode, list_date in zip(self.symbols['ts_code'], self.symbols['list_date']):
                     symbol, exchange = to_split_ts_codes(tscode)
 
-                    newest_local_bar = database_manager.get_newest_bar_data(symbol=symbol,
-                                                                            exchange=exchange,
-                                                                            interval=Interval.DAILY)
+                    newest_local_bar = self.get_newest_bar_data(symbol=symbol,
+                                                                exchange=exchange,
+                                                                interval=Interval.DAILY)
                     if newest_local_bar is not None:
                         pbar.set_description_str("正在处理股票代码：" + tscode + "本地最新数据：" +
                                                  newest_local_bar.datetime.strftime(TS_DATE_FORMATE))
@@ -216,4 +228,4 @@ if __name__ == '__main__':
     # a_share_daily_data_manager.download_all()
     # a_share_daily_data_manager.update_newest()
     # a_share_daily_data_manager.check_update_all()
-    auto_update(start_time=time(17, 42))
+    auto_update(start_time=time(21, 47))

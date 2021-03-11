@@ -82,7 +82,7 @@ tushare==1.2.62
 typing-extensions==3.7.4.3
 tzlocal==2.1
 urllib3==1.26.3
-vnpy==2.1.8
+vnpy==2.1.9
 websocket-client==0.57.0
 Werkzeug==1.0.1
 wincertstore==0.2
