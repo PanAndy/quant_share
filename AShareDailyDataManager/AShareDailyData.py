@@ -73,7 +73,7 @@ class AShareDailyDataManager:
         for overview in self.bar_overviews:
             if exchange == overview.exchange and interval == overview.interval and symbol == overview.symbol:
                 bars = database_manager.load_bar_data(symbol=symbol, exchange=exchange, interval=interval,
-                                                      start=overview.start, end=overview.start)
+                                                      start=overview.end, end=overview.end)
                 return bars[0] if bars is not None else None
         return None
 
