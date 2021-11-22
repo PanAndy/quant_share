@@ -1,4 +1,6 @@
 # 建议先安装vnpy，基于vnpy的安装环境进行开发。
+# AShareDailyDataManager是在vnpy 2.1版本下运行的
+# vnpy_tqsdk_free用于vnpy 2.7 版本，使用的时候注意一下。
 tqdm
-tushare==1.2.62
-vnpy==2.1.9.1
+tushare
+vnpy
