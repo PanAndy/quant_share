@@ -8,7 +8,7 @@ from tqsdk import TqApi, TqAuth
 
 from vnpy.trader.datafeed import BaseDatafeed
 from vnpy.trader.setting import SETTINGS
-from vnpy.trader.constant import Interval
+from vnpy.trader.constant import Interval, Exchange
 from vnpy.trader.object import BarData, HistoryRequest
 
 
@@ -21,6 +21,10 @@ INTERVAL_VT2TQ = {
 
 CHINA_TZ = timezone("Asia/Shanghai")
 
+MAIN_SUFFIX = "888"
+INDEX_SUFFIX = "999"
+MAIN_SUFFIX_OLD = "L"
+INDEX_SUFFIX_OLD = "I"
 
 class TqsdkDatafeed(BaseDatafeed):
     """天勤TQsdk数据服务接口"""
@@ -40,7 +44,20 @@ class TqsdkDatafeed(BaseDatafeed):
             return None
 
         # 查询数据
-        tq_symbol = f"{req.exchange.value}.{req.symbol}"
+        if MAIN_SUFFIX in req.symbol:
+            req_symbol = req.symbol.replace(MAIN_SUFFIX, "")
+            if req.exchange is Exchange.CZCE:
+                tq_symbol = "KQ.m@{}.{}".format(req.exchange.value, req_symbol.upper())
+            else:
+                tq_symbol = "KQ.m@{}.{}".format(req.exchange.value, req_symbol.lower())
+        elif INDEX_SUFFIX in req.symbol:
+            req_symbol = req.symbol.replace(INDEX_SUFFIX, "")
+            if req.exchange is Exchange.CZCE:
+                tq_symbol = "KQ.i@{}.{}".format(req.exchange.value, req_symbol.upper())
+            else:
+                tq_symbol = "KQ.i@{}.{}".format(req.exchange.value, req_symbol.lower())
+        else:
+            tq_symbol = f"{req.exchange.value}.{req.symbol}"
 
         data_length = int((req.end - req.start).total_seconds() / INTERVAL_VT2TQ[req.interval])
         df: pd.DataFrame = api.get_kline_serial(
